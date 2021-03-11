@@ -13,10 +13,23 @@ namespace TodoAPI.ResourceParameters
         [FromQuery(Name = "search")]
         public string Search { get; set; }
         [FromQuery(Name = "priority")]
-        public string Priority { get; set; }
+        public int? Priority { get; set; }
         [FromQuery(Name = "priority.gt")]
-        public string PriorityGT { get; set; }
+        public int? PriorityGT { get; set; }
         [FromQuery(Name = "priority.lt")]
-        public string PriorityLT { get; set; }
+        public int? PriorityLT { get; set; }
+
+        public bool IsEmpty
+        {
+            get
+            {
+                return
+                    string.IsNullOrWhiteSpace(NameExact) &&
+                    string.IsNullOrWhiteSpace(Search) &&
+                    (Priority == null) &&
+                    (PriorityGT == null) &&
+                    (PriorityLT == null);
+            }
+        }
     }
 }
