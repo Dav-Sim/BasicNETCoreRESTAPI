@@ -55,7 +55,8 @@ namespace TodoAPI
             //add automapper for mapping between entities and DTO objects
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-            //TODO add repository
+            //add repository
+            services.AddSingleton<Services.TasksRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
