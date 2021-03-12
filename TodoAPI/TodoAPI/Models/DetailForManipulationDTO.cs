@@ -11,7 +11,7 @@ namespace TodoAPI.Models
         [Required]
         [MaxLength(100)]
         public virtual string Title { get; set; }
-        [MaxLength(100)]
+        [MaxLength(1000)]
         public virtual string Text { get; set; }
     }
 }

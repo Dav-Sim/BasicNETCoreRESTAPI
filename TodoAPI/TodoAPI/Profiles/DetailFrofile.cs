@@ -13,6 +13,7 @@ namespace TodoAPI.Profiles
             //create map from ENTITY to DTO
             CreateMap<Entities.Detail, Models.DetailDTO>();
             CreateMap<Entities.Detail, Models.DetailForUpdatingDTO>();
+            CreateMap<Entities.Detail, Models.DetailForCreatingDTO>();
 
 
             //create map from DTO to ENTITY

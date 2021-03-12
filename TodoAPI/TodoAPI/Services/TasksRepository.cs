@@ -51,14 +51,17 @@ namespace TodoAPI.Services
                     Updated = DateTime.Now
                 }
             };
-            _List[0].Details.Add(new Entities.Detail()
+
+            var first = _List.First();
+
+            first.Details.Add(new Entities.Detail()
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-0000000000a1"),
                 Task = _List[0],
                 Text = "Detail text 1",
                 Title = "Detail Title 1"
             });
-            _List[0].Details.Add(new Entities.Detail()
+            first.Details.Add(new Entities.Detail()
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-0000000000a2"),
                 Task = _List[0],
@@ -75,6 +78,7 @@ namespace TodoAPI.Services
         {
             var i = _List.FindIndex(a => a.Id == id);
             task.Id = id;
+            task.Details = _List[i].Details;
             _List[i] = task;
             return _List[i];
         }
@@ -128,6 +132,10 @@ namespace TodoAPI.Services
         {
             return _List;
         }
+        public IEnumerable<Entities.Task> GetAll(IEnumerable<Guid> ids)
+        {
+            return _List.Where(a => ids.Any(id => a.Id == id));
+        }
         public Entities.Task GetOne(Guid id)
         {
             return _List.FirstOrDefault(a => a.Id == id);
@@ -160,14 +168,23 @@ namespace TodoAPI.Services
             task.Details.Add(detail);
             return detail;
         }
-        public IEnumerable<Entities.Detail> GetAllDetails(Guid taskId)
+        public Entities.Detail CreateDetailwithId(Guid taskId, Guid detailId, Entities.Detail detail)
         {
-            return _List.Where(t => t.Id == taskId).SelectMany(t => t.Details);
+            detail.Id = detailId;
+            var task = _List.FirstOrDefault(t => t.Id == taskId);
+            detail.Task = task;
+            task.Details.Add(detail);
+            return detail;
         }
-        public Entities.Detail GetOne(Guid taskId, Guid detailId)
+        public IEnumerable<Entities.Detail> GetDetails(Guid taskId)
         {
-            return _List.FirstOrDefault(t => t.Id == taskId)?.Details.FirstOrDefault(d => d.Id == detailId);
+            var result = _List.Where(t => t.Id == taskId).SelectMany(t => t.Details);
+            return result;
         }
-
+        public Entities.Detail GetDetail(Guid taskId, Guid detailId)
+        {
+            var detail = _List.FirstOrDefault(t => t.Id == taskId)?.Details.FirstOrDefault(d => d.Id == detailId);
+            return detail;
+        }
     }
 }
