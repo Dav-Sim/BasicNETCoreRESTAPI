@@ -17,5 +17,6 @@ namespace TodoAPI.Models
         [Range(0, double.MaxValue)]
         public virtual int Priority { get; set; }
         public virtual string Status { get; set; }
+        public virtual List<DetailForCreatingDTO> Details { get; set; } = new List<DetailForCreatingDTO>();
     }
 }

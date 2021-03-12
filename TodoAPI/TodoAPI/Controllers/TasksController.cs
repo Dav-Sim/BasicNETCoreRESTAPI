@@ -24,8 +24,8 @@ namespace TodoAPI.Controllers
 
         public TasksController(TasksRepository repository, IMapper mapper)
         {
-            _Repo = repository;
-            _Mapper = mapper;
+            _Repo = repository ?? throw new ArgumentNullException(nameof(repository));
+            _Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
         /// <summary>

@@ -13,14 +13,13 @@ namespace TodoAPI.Entities
         [Required]
         [MaxLength(100)]
         public string Name { get; set; }
-        [Required]
-        [MaxLength(1000)]
         public string Description { get; set; }
         [Range(0, double.MaxValue)]
         public int Priority { get; set; }
         public Status Status { get; set; }
         [Required]
         public DateTime Updated { get; set; }
+        public List<Detail> Details { get; set; } = new List<Detail>();
     }
 
     public enum Status
