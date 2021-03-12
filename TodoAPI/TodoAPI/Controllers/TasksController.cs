@@ -19,10 +19,10 @@ namespace TodoAPI.Controllers
     public class TasksController : ControllerBase
     {
         private const string GetTaskRoute = "GetTask";
-        private readonly TasksRepository _Repo;
+        private readonly ITasksRepository _Repo;
         private readonly IMapper _Mapper;
 
-        public TasksController(TasksRepository repository, IMapper mapper)
+        public TasksController(ITasksRepository repository, IMapper mapper)
         {
             _Repo = repository;
             _Mapper = mapper;

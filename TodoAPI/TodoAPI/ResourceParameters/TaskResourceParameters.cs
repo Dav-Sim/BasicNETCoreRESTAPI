@@ -8,6 +8,9 @@ namespace TodoAPI.ResourceParameters
 {
     public class TaskResourceParameters
     {
+        private const int maxPageSize = 20;
+        private int pageSize = 5;
+
         [FromQuery(Name = "name")]
         public string NameExact { get; set; }
         [FromQuery(Name = "search")]
@@ -19,7 +22,15 @@ namespace TodoAPI.ResourceParameters
         [FromQuery(Name = "priority.lt")]
         public int? PriorityLT { get; set; }
 
-        public bool IsEmpty
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { 
+            get => pageSize; 
+            set => pageSize = value > maxPageSize ? maxPageSize : value; 
+        }
+        /// <summary>
+        /// is empty, except of paging atts - these arent empty never
+        /// </summary>
+        public bool IsFiltersEmpty
         {
             get
             {

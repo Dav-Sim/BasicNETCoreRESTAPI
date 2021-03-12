@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TodoAPI.Helpers;
 
 namespace TodoAPI.Services
 {
     //Fake repo
-    public class TasksRepository
+    public class TasksRepository : ITasksRepository
     {
         private List<Entities.Task> _List = new List<Entities.Task>()
         {
@@ -65,17 +66,11 @@ namespace TodoAPI.Services
             _List.Add(task);
             return task;
         }
-        public IEnumerable<Entities.Task> GetAll(ResourceParameters.TaskResourceParameters query)
+        public PagedList<Entities.Task> GetAll(ResourceParameters.TaskResourceParameters query)
         {
             if (query == null)
             {
                 throw new ArgumentNullException(nameof(query));
-            }
-
-            //if no query return all
-            if (query.IsEmpty)
-            {
-                return GetAll();
             }
 
             //evaluate query and return
@@ -103,11 +98,14 @@ namespace TodoAPI.Services
                 collection = collection.Where(a => a.Priority < query.PriorityLT.Value);
             }
 
-            return collection;
-        }
-        public IEnumerable<Entities.Task> GetAll()
-        {
-            return _List;
+            return PagedList<Entities.Task>.Create(
+                collection.AsQueryable(),
+                query.PageNumber,
+                query.PageSize);
+
+            //return collection
+            //    .Skip((query.PageNumber - 1) * query.PageSize)
+            //    .Take(query.PageSize);
         }
         public Entities.Task GetOne(Guid id)
         {
