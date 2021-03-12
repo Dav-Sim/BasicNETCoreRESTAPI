@@ -879,7 +879,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "[\r\n    {\r\n        \"name\": \"Added to collection Task 1\",\r\n        \"description\": \"Added to collection desc1\",\r\n        \"priority\": 123,\r\n        \"status\": \"NotStarted\"\r\n    },\r\n    {\r\n        \"name\": \"Added to collection Task 2\",\r\n        \"description\": \"Added to collection desc2\",\r\n        \"priority\": 999,\r\n        \"status\": \"InProgress\"\r\n    }\r\n]"
+							"raw": "[\r\n    {\r\n        \"name\": \"Added to collection Task 1\",\r\n        \"description\": \"Added to collection desc1\",\r\n        \"priority\": 123,\r\n        \"status\": \"NotStarted\",\r\n        \"details\":[\r\n            {\r\n                \"title\":\"title\",\r\n                \"text\":\"text\"\r\n            }\r\n        ]\r\n    },\r\n    {\r\n        \"name\": \"Added to collection Task 2\",\r\n        \"description\": \"Added to collection desc2\",\r\n        \"priority\": 999,\r\n        \"status\": \"InProgress\"\r\n    }\r\n]"
 						},
 						"url": {
 							"raw": "{{URL}}/taskscollection",

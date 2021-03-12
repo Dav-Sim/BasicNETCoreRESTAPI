@@ -3,6 +3,11 @@
    
 This API is not fully "RESTful" - it lacks lot of "advanced" things, like HATEOAS, Caching, Concurrency, data-shaping etc. but anyway it is a good starting point...
 
+## News
+- Added collection controller (can be added or retrieved multiple tasks at one request)
+- Added child class "task detail" and controller for it
+- Updated postman tests
+
 ## What is inside
 
 ### Content negotiation

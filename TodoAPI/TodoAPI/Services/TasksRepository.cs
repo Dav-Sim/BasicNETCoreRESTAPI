@@ -85,6 +85,7 @@ namespace TodoAPI.Services
         public Entities.Task Create(Entities.Task task)
         {
             task.Id = Guid.NewGuid();
+            task.Details.ForEach(a => { a.Id = Guid.NewGuid(); a.Task = task; });
             _List.Add(task);
             return task;
         }
