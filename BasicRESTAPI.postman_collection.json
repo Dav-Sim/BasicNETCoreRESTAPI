@@ -6,6 +6,941 @@
 	},
 	"item": [
 		{
+			"name": "ChildItems",
+			"item": [
+				{
+					"name": "OPTIONS details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "OPTIONS",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET details",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details/00000000-0000-0000-0000-0000000000a1",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details",
+								"00000000-0000-0000-0000-0000000000a1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "HEAD detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "HEAD",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details/00000000-0000-0000-0000-0000000000a1",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details",
+								"00000000-0000-0000-0000-0000000000a1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET detail xml",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text",
+								"disabled": true
+							},
+							{
+								"key": "Accept",
+								"value": "application/xml",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details/00000000-0000-0000-0000-0000000000a1",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details",
+								"00000000-0000-0000-0000-0000000000a1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET detail 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-00000000000a/details/00000000-0000-0000-0000-a000000000aa",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-00000000000a",
+								"details",
+								"00000000-0000-0000-0000-a000000000aa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"pm.test(\"Location is present\", function () {\r",
+									"    pm.response.to.have.header(\"Location\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"Newly created Detail Title\"\r\n}"
+						},
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST detail 422",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422\", function () {\r",
+									"    pm.response.to.have.status(422);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"title\",\r\n    \"text\":\"TOO LONG TEXT Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam.\"\r\n}"
+						},
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 204\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+									"    tests[\"code is \" + pm.response.code] = true; \r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"UPDATED Detail Title\",\r\n    \"text\": \"UPDATED text\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details/00000000-0000-0000-0000-0000000000a1",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details",
+								"00000000-0000-0000-0000-0000000000a1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT detail 422",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422\", function () {\r",
+									"    pm.response.to.have.status(422);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"UPDATED Detail Title\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details/00000000-0000-0000-0000-0000000000a1",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details",
+								"00000000-0000-0000-0000-0000000000a1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PUT detail 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"UPDATED Detail Title\",\r\n    \"text\": \"UPDATED text\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-00000000000a/details/00000000-0000-0000-0000-0000000000a1",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-00000000000a",
+								"details",
+								"00000000-0000-0000-0000-0000000000a1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPSERT with PUT detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 (created) 200 (ok) or 204(no content)\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);\r",
+									"    tests[\"code is \" + pm.response.code] = true; \r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"title\": \"UPSERTED Detail Title\",\r\n    \"text\": \"UPSERTED text\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details/00000000-0000-0000-0000-00000000aaaa",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details",
+								"00000000-0000-0000-0000-00000000aaaa"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PATCH detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200 or 204\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 204]);\r",
+									"    tests[\"code is \" + pm.response.code] = true; \r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"op\": \"replace\",\r\n        \"path\": \"/title\",\r\n        \"value\": \"PATCHED Detail Title\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details/00000000-0000-0000-0000-0000000000a1",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details",
+								"00000000-0000-0000-0000-0000000000a1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "PATCH detail 422",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422\", function () {\r",
+									"    pm.response.to.have.status(422);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"op\": \"remove\",\r\n        \"path\": \"/title\",\r\n        \"value\": \"PATCHED Detail Title\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details/00000000-0000-0000-0000-0000000000a1",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details",
+								"00000000-0000-0000-0000-0000000000a1"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "UPSERT with PATCH detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201 (created) 200 (ok) or 204(no content)\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204]);\r",
+									"    tests[\"code is \" + pm.response.code] = true; \r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"op\": \"replace\",\r\n        \"path\": \"/title\",\r\n        \"value\": \"UPSERTED title with PATCH\"\r\n    },\r\n    {\r\n        \"op\": \"replace\",\r\n        \"path\": \"/text\",\r\n        \"value\": \"UPSERTED value with PATCH\"\r\n    }\r\n]",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details/00000000-0000-0000-0000-0000000000ac",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details",
+								"00000000-0000-0000-0000-0000000000ac"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE detail",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 204 or 404\", function () {\r",
+									"    pm.expect(pm.response.code).to.be.oneOf([404, 204]);\r",
+									"    tests[\"code is \" + pm.response.code] = true; \r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001/details/00000000-0000-0000-0000-0000000000a2",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"tasks",
+								"00000000-0000-0000-0000-000000000001",
+								"details",
+								"00000000-0000-0000-0000-0000000000a2"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "TasksCollection",
+			"item": [
+				{
+					"name": "GET collection",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"Result contains 2 items\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length).to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/taskscollection/(00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-000000000004)",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"taskscollection",
+								"(00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-000000000004)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET collection 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/taskscollection/(00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-00000000000f)",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"taskscollection",
+								"(00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-00000000000f)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST collection",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"pm.test(\"Result contains 2 items\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length).to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"name\": \"Added to collection Task 1\",\r\n        \"description\": \"Added to collection desc1\",\r\n        \"priority\": 123,\r\n        \"status\": \"NotStarted\"\r\n    },\r\n    {\r\n        \"name\": \"Added to collection Task 2\",\r\n        \"description\": \"Added to collection desc2\",\r\n        \"priority\": 999,\r\n        \"status\": \"InProgress\"\r\n    }\r\n]"
+						},
+						"url": {
+							"raw": "{{URL}}/taskscollection",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"taskscollection"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST collection 422",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422\", function () {\r",
+									"    pm.response.to.have.status(422);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"name\": \"Added to collection Task 1\",\r\n        \"description\": \"Added to collection desc1\",\r\n        \"priority\": -200,\r\n        \"status\": \"NotStarted\"\r\n    },\r\n    {\r\n        \"name\": \"NAME\",\r\n        \"description\": \"NAME\",\r\n        \"priority\": 999,\r\n        \"status\": \"InProgress\"\r\n    }\r\n]"
+						},
+						"url": {
+							"raw": "{{URL}}/taskscollection",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"taskscollection"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "OPTIONS",
 			"event": [
 				{
@@ -433,6 +1368,9 @@
 						"exec": [
 							"pm.test(\"Status code is 201\", function () {\r",
 							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"pm.test(\"Location is present\", function () {\r",
+							"    pm.response.to.have.header(\"Location\");\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -787,6 +1725,54 @@
 					"path": [
 						"tasks",
 						"00000000-0000-0000-0000-000000000001"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204 or 404\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([404, 204]);\r",
+							"    tests[\"code is \" + pm.response.code] = true; \r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000002",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks",
+						"00000000-0000-0000-0000-000000000002"
 					]
 				}
 			},
