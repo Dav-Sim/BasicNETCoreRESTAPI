@@ -3,24 +3,82 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using TodoAPI.Helpers;
+using TodoAPI.Services.SortingServices;
 
 namespace TodoAPI.Services
 {
     //Fake repo
     public class TasksRepository : ITasksRepository
     {
-        private List<Entities.Task> _List = new List<Entities.Task>()
+        private List<Entities.Task> _List = new List<Entities.Task>();
+        private readonly IPropertyMappingService _PropertyMapping;
+
+        public TasksRepository(IPropertyMappingService propertyMapping)
         {
-            new Entities.Task()
+            this._PropertyMapping = propertyMapping ?? 
+                throw new ArgumentNullException(nameof(propertyMapping));
+
+            _List = new List<Entities.Task>()
             {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                Name = "Task1",
-                Description = "Desc for Task1",
-                Priority = 1,
-                Status = Entities.Status.NotStarted,
-                Updated = DateTime.Now
-            },
-            new Entities.Task()
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                    Name = "Task1",
+                    Description = "Desc for Task1",
+                    Priority = 1,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                },
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                    Name = "Task2",
+                    Description = "Desc for Task2",
+                    Priority = 100,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                },
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000003"),
+                    Name = "Task3",
+                    Description = "Desc for Task3",
+                    Priority = 3,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                },
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
+                    Name = "Task4",
+                    Description = "Desc for Task4",
+                    Priority = 1,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                },
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000005"),
+                    Name = "Task5",
+                    Description = "Desc for Task5",
+                    Priority = 3,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                },
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000006"),
+                    Name = "Task6",
+                    Description = "Desc for Task6",
+                    Priority = 2,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                }
+            };
+
+            var first = _List.First();
+
+            first.Details.Add(new Entities.Detail()
             {
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
                 Name = "Task2",
@@ -31,23 +89,12 @@ namespace TodoAPI.Services
             },
             new Entities.Task()
             {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000003"),
-                Name = "Task3",
-                Description = "Desc for Task3",
-                Priority = 3,
-                Status = Entities.Status.NotStarted,
-                Updated = DateTime.Now
-            },
-            new Entities.Task()
-            {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
-                Name = "Task4",
-                Description = "Desc for Task4",
-                Priority = 0,
-                Status = Entities.Status.NotStarted,
-                Updated = DateTime.Now
-            }
-        };
+                Id = Guid.Parse("00000000-0000-0000-0000-0000000000a2"),
+                Task = _List[0],
+                Text = "Detail text 2",
+                Title = "Detail Title 2"
+            });        
+        }
 
         public void Delete(Entities.Task task)
         {
@@ -74,7 +121,7 @@ namespace TodoAPI.Services
             }
 
             //evaluate query and return
-            IEnumerable<Entities.Task> collection = _List;
+            IQueryable<Entities.Task> collection = _List.AsQueryable();
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
                 var search = query.Search.ToLower().Trim();
@@ -96,6 +143,19 @@ namespace TodoAPI.Services
             if (query.PriorityLT != null)
             {
                 collection = collection.Where(a => a.Priority < query.PriorityLT.Value);
+            }
+
+            //order by
+            if (!string.IsNullOrWhiteSpace(query.orderBy))
+            {
+                //get prop mapping dictionary
+                var taskPropertyMappingDictionary =
+                    _PropertyMapping.GetPropertyMapping<Models.TaskDTO, Entities.Task>();
+
+                //apply sort
+                collection = collection.ApplySort(
+                    query.orderBy,
+                    taskPropertyMappingDictionary);
             }
 
             return PagedList<Entities.Task>.Create(

@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 using TodoAPI.Helpers;
 using TodoAPI.ResourceParameters;
 using TodoAPI.Services;
+using TodoAPI.Services.SortingServices;
 
 namespace TodoAPI.Controllers
 {
@@ -24,11 +25,13 @@ namespace TodoAPI.Controllers
         private const string GetTasksRoute = "GetTasks";
         private readonly ITasksRepository _Repo;
         private readonly IMapper _Mapper;
+        private readonly IPropertyMappingService _PropertyMappingService;
 
-        public TasksController(ITasksRepository repository, IMapper mapper)
+        public TasksController(ITasksRepository repository, IMapper mapper, IPropertyMappingService propertyMappingService)
         {
-            _Repo = repository;
-            _Mapper = mapper;
+            _Repo = repository ?? throw new ArgumentNullException(nameof(repository));
+            _Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _PropertyMappingService = propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));
         }
 
         /// <summary>
@@ -54,6 +57,13 @@ namespace TodoAPI.Controllers
         public ActionResult<IEnumerable<Models.TaskDTO>> GetTasks(
             [FromQuery] TaskResourceParameters parameters)
         {
+            //check property mapping DTO to Entity (for sorting)
+            if (!_PropertyMappingService
+                .ValidMappingExistsFor<Models.TaskDTO, Entities.Task>(parameters.orderBy))
+            {
+                return BadRequest();
+            }
+
             //get tasks
             var tasks = _Repo.GetAll(parameters);
 
@@ -249,6 +259,7 @@ namespace TodoAPI.Controllers
             ResourceUriType type)
         {
             var newParameters = new Dictionary<string, object>();
+            newParameters.Add("orderBy", parameters.orderBy);
             newParameters.Add("pageSize", parameters.PageSize);
             newParameters.Add("name", parameters.NameExact);
             newParameters.Add("search", parameters.Search);

@@ -206,6 +206,136 @@
 			"response": []
 		},
 		{
+			"name": "GET tasks paging with order by",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/xml",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks?pageNumber=1&pageSize=3&search=task&orderby=priority desc, name",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "pageNumber",
+							"value": "1"
+						},
+						{
+							"key": "pageSize",
+							"value": "3"
+						},
+						{
+							"key": "priority.gt",
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "search",
+							"value": "task"
+						},
+						{
+							"key": "orderby",
+							"value": "priority desc, name"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET tasks order by error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/xml",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks?pageNumber=1&pageSize=3&search=task&orderby=nonsens",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "pageNumber",
+							"value": "1"
+						},
+						{
+							"key": "pageSize",
+							"value": "3"
+						},
+						{
+							"key": "priority.gt",
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "search",
+							"value": "task"
+						},
+						{
+							"key": "orderby",
+							"value": "nonsens"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "GET tasks xml",
 			"event": [
 				{

@@ -27,20 +27,7 @@ namespace TodoAPI.ResourceParameters
             get => pageSize; 
             set => pageSize = value > maxPageSize ? maxPageSize : value; 
         }
-        /// <summary>
-        /// is empty, except of paging atts - these arent empty never
-        /// </summary>
-        public bool IsFiltersEmpty
-        {
-            get
-            {
-                return
-                    string.IsNullOrWhiteSpace(NameExact) &&
-                    string.IsNullOrWhiteSpace(Search) &&
-                    (Priority == null) &&
-                    (PriorityGT == null) &&
-                    (PriorityLT == null);
-            }
-        }
+
+        public string orderBy { get; set; } = "Name";
     }
 }
