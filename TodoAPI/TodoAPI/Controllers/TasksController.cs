@@ -26,12 +26,14 @@ namespace TodoAPI.Controllers
         private readonly ITasksRepository _Repo;
         private readonly IMapper _Mapper;
         private readonly IPropertyMappingService _PropertyMappingService;
+        private readonly IPropertyCheckerService _PropertyChecker;
 
-        public TasksController(ITasksRepository repository, IMapper mapper, IPropertyMappingService propertyMappingService)
+        public TasksController(ITasksRepository repository, IMapper mapper, IPropertyMappingService propertyMappingService, IPropertyCheckerService propertyChecker)
         {
             _Repo = repository ?? throw new ArgumentNullException(nameof(repository));
             _Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
             _PropertyMappingService = propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));
+            _PropertyChecker = propertyChecker ?? throw new ArgumentNullException(nameof(propertyChecker));
         }
 
         /// <summary>
@@ -54,12 +56,18 @@ namespace TodoAPI.Controllers
         /// <returns>200</returns>
         [HttpGet(Name = GetTasksRoute)]
         [HttpHead]
-        public ActionResult<IEnumerable<Models.TaskDTO>> GetTasks(
+        public ActionResult<IEnumerable<object>> GetTasks(
             [FromQuery] TaskResourceParameters parameters)
         {
             //check property mapping DTO to Entity (for sorting)
             if (!_PropertyMappingService
                 .ValidMappingExistsFor<Models.TaskDTO, Entities.Task>(parameters.orderBy))
+            {
+                return BadRequest();
+            }
+
+            //check data shaping fields request
+            if (!_PropertyChecker.TypeHasProperties<Models.TaskDTO>(parameters.Fields))
             {
                 return BadRequest();
             }
@@ -88,7 +96,8 @@ namespace TodoAPI.Controllers
                 JsonConvert.SerializeObject(paginationMetaData));
 
             //map to DTOs
-            var taskDtos = _Mapper.Map<IEnumerable<Models.TaskDTO>>(tasks);
+            var taskDtos = _Mapper.Map<IEnumerable<Models.TaskDTO>>(tasks)
+                .ShapeData(parameters.Fields);
             
             //return 200 with DTO in body
             return Ok(taskDtos);
@@ -100,8 +109,14 @@ namespace TodoAPI.Controllers
         /// <returns>200/404</returns>
         [HttpGet("{id}", Name = GetTaskRoute)]
         [HttpHead("{id}")]
-        public ActionResult<Models.TaskDTO> GetTask(Guid id)
+        public ActionResult<Models.TaskDTO> GetTask(Guid id, string fields)
         {
+            //check data shaping fields request
+            if (!_PropertyChecker.TypeHasProperties<Models.TaskDTO>(fields))
+            {
+                return BadRequest();
+            }
+
             //get task
             var task = _Repo.GetOne(id);
 
@@ -114,8 +129,11 @@ namespace TodoAPI.Controllers
             //map to DTO
             var taskDto = _Mapper.Map<Models.TaskDTO>(task);
 
+            //shape data
+            var shapedDto = taskDto.ShapeData(fields);
+
             //return 200 with DTO in body
-            return Ok(taskDto);
+            return Ok(shapedDto);
         }
 
         /// <summary>
@@ -295,6 +313,7 @@ namespace TodoAPI.Controllers
             ResourceUriType type)
         {
             var newParameters = new Dictionary<string, object>();
+            newParameters.Add("fields", parameters.Fields);
             newParameters.Add("orderBy", parameters.orderBy);
             newParameters.Add("pageSize", parameters.PageSize);
             newParameters.Add("name", parameters.NameExact);
