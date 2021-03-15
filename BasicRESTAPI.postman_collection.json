@@ -271,6 +271,58 @@
 			"response": []
 		},
 		{
+			"name": "GET tasks dataShaping",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"result object has 2 fields\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(Object.keys(jsonData[0]).length).to.eql(2);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks?fields=id, name",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "fields",
+							"value": "id, name"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "GET tasks paging",
 			"event": [
 				{
@@ -749,6 +801,104 @@
 					"path": [
 						"tasks",
 						"00000000-0000-0000-0000-000000000001"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET task shaped",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001?fields=name, priority",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks",
+						"00000000-0000-0000-0000-000000000001"
+					],
+					"query": [
+						{
+							"key": "fields",
+							"value": "name, priority"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET task shaped bad 400",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001?fields=name, nonsens",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks",
+						"00000000-0000-0000-0000-000000000001"
+					],
+					"query": [
+						{
+							"key": "fields",
+							"value": "name, nonsens"
+						}
 					]
 				}
 			},
