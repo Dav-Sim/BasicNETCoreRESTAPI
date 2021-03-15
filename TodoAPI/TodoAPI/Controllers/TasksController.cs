@@ -157,6 +157,13 @@ namespace TodoAPI.Controllers
             if (task == null)
             {
                 return NotFound();
+
+                //here should be UPSERT instead of 404
+
+                //here is UPSERT code if we want to
+                /*
+                UpsertTask(id, updatedDto);
+                */
             }
 
             //map from DTO to ENTITY
@@ -189,6 +196,17 @@ namespace TodoAPI.Controllers
                 return NotFound();
 
                 //here should be UPSERT instead of 404
+
+                //here is UPSERT code if we want to
+                /*
+                var taskDto = new Models.TaskForUpdatingDTO();
+                patch.ApplyTo(taskDto, ModelState);
+                if (!TryValidateModel(taskDto))
+                {
+                    return ValidationProblem(ModelState);
+                }
+                UpsertTask(id, taskDto);
+                */
             }
 
             //map ENTITY to DTO (model for updating)
@@ -237,6 +255,24 @@ namespace TodoAPI.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// UPSERT code for creating task by PUT or PATCH
+        /// </summary>
+        /// <returns>201 created at route</returns>
+        private ActionResult UpsertTask(Guid taskId, Models.TaskForUpdatingDTO taskDto)
+        {
+            var taskToAdd = _Mapper.Map<Entities.Task>(taskDto);
+            taskToAdd.Id = taskId;
+
+            Entities.Task addedTask = _Repo.CreateTaskWithSpecifiedId(taskId, taskToAdd);
+
+            var taskToReturn = _Mapper.Map<Models.TaskDTO>(addedTask);
+            return CreatedAtRoute(
+                GetTaskRoute,
+                new { taskId = taskToReturn.Id },
+                taskToReturn
+                );
+        }
 
         /// <summary>
         /// override validation in order to return 422 on validation problem instead of 400

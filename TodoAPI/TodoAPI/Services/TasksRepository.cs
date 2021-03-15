@@ -74,26 +74,7 @@ namespace TodoAPI.Services
                     Status = Entities.Status.NotStarted,
                     Updated = DateTime.Now
                 }
-            };
-
-            var first = _List.First();
-
-            first.Details.Add(new Entities.Detail()
-            {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
-                Name = "Task2",
-                Description = "Desc for Task2",
-                Priority = 100,
-                Status = Entities.Status.NotStarted,
-                Updated = DateTime.Now
-            },
-            new Entities.Task()
-            {
-                Id = Guid.Parse("00000000-0000-0000-0000-0000000000a2"),
-                Task = _List[0],
-                Text = "Detail text 2",
-                Title = "Detail Title 2"
-            });        
+            };       
         }
 
         public void Delete(Entities.Task task)
@@ -171,6 +152,20 @@ namespace TodoAPI.Services
         {
             return _List.FirstOrDefault(a => a.Id == id);
         }
-
+        public IEnumerable<Entities.Task> GetAll(IEnumerable<Guid> ids)
+        {
+            return _List.Where(t => ids.Any(id => t.Id == id));
+        }
+        public bool TaskExists(Guid id)
+        {
+            return GetOne(id) != null;
+        }
+        public Entities.Task CreateTaskWithSpecifiedId(Guid taskId, Entities.Task task)
+        {
+            task.Id = taskId;
+            _List.Add(task);
+            return task;
+        }
+    }
     }
 }
