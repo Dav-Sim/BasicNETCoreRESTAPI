@@ -6,6 +6,183 @@
 	},
 	"item": [
 		{
+			"name": "TasksCollection",
+			"item": [
+				{
+					"name": "GET collection",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"    pm.response.to.have.status(200);\r",
+									"});\r",
+									"pm.test(\"Result contains 2 items\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length).to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/taskscollection/(00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-000000000004)",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"taskscollection",
+								"(00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-000000000004)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET collection 404",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {\r",
+									"    pm.response.to.have.status(404);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{URL}}/taskscollection/(00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-00000000000f)",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"taskscollection",
+								"(00000000-0000-0000-0000-000000000001,00000000-0000-0000-0000-00000000000f)"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST collection",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"    pm.response.to.have.status(201);\r",
+									"});\r",
+									"pm.test(\"Result contains 2 items\", function () {\r",
+									"    var jsonData = pm.response.json();\r",
+									"    pm.expect(jsonData.length).to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"name\": \"Added to collection Task 1\",\r\n        \"description\": \"Added to collection desc1\",\r\n        \"priority\": 123,\r\n        \"status\": \"NotStarted\",\r\n        \"details\":[\r\n            {\r\n                \"title\":\"title\",\r\n                \"text\":\"text\"\r\n            }\r\n        ]\r\n    },\r\n    {\r\n        \"name\": \"Added to collection Task 2\",\r\n        \"description\": \"Added to collection desc2\",\r\n        \"priority\": 999,\r\n        \"status\": \"InProgress\"\r\n    }\r\n]"
+						},
+						"url": {
+							"raw": "{{URL}}/taskscollection",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"taskscollection"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST collection 422",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 422\", function () {\r",
+									"    pm.response.to.have.status(422);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "[\r\n    {\r\n        \"name\": \"Added to collection Task 1\",\r\n        \"description\": \"Added to collection desc1\",\r\n        \"priority\": -200,\r\n        \"status\": \"NotStarted\"\r\n    },\r\n    {\r\n        \"name\": \"NAME\",\r\n        \"description\": \"NAME\",\r\n        \"priority\": 999,\r\n        \"status\": \"InProgress\"\r\n    }\r\n]"
+						},
+						"url": {
+							"raw": "{{URL}}/taskscollection",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"taskscollection"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "OPTIONS",
 			"event": [
 				{
@@ -88,6 +265,251 @@
 					],
 					"path": [
 						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET tasks paging",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"pagination header is present\", function () {\r",
+							"    pm.response.to.have.header(\"X-Pagination\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks?pageNumber=2&pageSize=2",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "pageNumber",
+							"value": "2"
+						},
+						{
+							"key": "pageSize",
+							"value": "2"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET tasks paging with search",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks?pageNumber=2&pageSize=2&priority.gt=0&search=task",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "pageNumber",
+							"value": "2"
+						},
+						{
+							"key": "pageSize",
+							"value": "2"
+						},
+						{
+							"key": "priority.gt",
+							"value": "0"
+						},
+						{
+							"key": "search",
+							"value": "task"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET tasks paging with order by",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/xml",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks?pageNumber=1&pageSize=3&search=task&orderby=priority desc, name",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "pageNumber",
+							"value": "1"
+						},
+						{
+							"key": "pageSize",
+							"value": "3"
+						},
+						{
+							"key": "priority.gt",
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "search",
+							"value": "task"
+						},
+						{
+							"key": "orderby",
+							"value": "priority desc, name"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET tasks order by error",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"type": "text",
+						"value": "application/xml",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks?pageNumber=1&pageSize=3&search=task&orderby=nonsens",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "pageNumber",
+							"value": "1"
+						},
+						{
+							"key": "pageSize",
+							"value": "3"
+						},
+						{
+							"key": "priority.gt",
+							"value": "0",
+							"disabled": true
+						},
+						{
+							"key": "search",
+							"value": "task"
+						},
+						{
+							"key": "orderby",
+							"value": "nonsens"
+						}
 					]
 				}
 			},
@@ -433,6 +855,9 @@
 						"exec": [
 							"pm.test(\"Status code is 201\", function () {\r",
 							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"pm.test(\"Location is present\", function () {\r",
+							"    pm.response.to.have.header(\"Location\");\r",
 							"});"
 						],
 						"type": "text/javascript"
@@ -787,6 +1212,54 @@
 					"path": [
 						"tasks",
 						"00000000-0000-0000-0000-000000000001"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204 or 404\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([404, 204]);\r",
+							"    tests[\"code is \" + pm.response.code] = true; \r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": ""
+				},
+				"url": {
+					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000002",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks",
+						"00000000-0000-0000-0000-000000000002"
 					]
 				}
 			},

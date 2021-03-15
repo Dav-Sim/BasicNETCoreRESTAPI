@@ -5,12 +5,15 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TodoAPI.Helpers;
 using TodoAPI.ResourceParameters;
 using TodoAPI.Services;
+using TodoAPI.Services.SortingServices;
 
 namespace TodoAPI.Controllers
 {
@@ -19,13 +22,16 @@ namespace TodoAPI.Controllers
     public class TasksController : ControllerBase
     {
         private const string GetTaskRoute = "GetTask";
-        private readonly TasksRepository _Repo;
+        private const string GetTasksRoute = "GetTasks";
+        private readonly ITasksRepository _Repo;
         private readonly IMapper _Mapper;
+        private readonly IPropertyMappingService _PropertyMappingService;
 
-        public TasksController(TasksRepository repository, IMapper mapper)
+        public TasksController(ITasksRepository repository, IMapper mapper, IPropertyMappingService propertyMappingService)
         {
-            _Repo = repository;
-            _Mapper = mapper;
+            _Repo = repository ?? throw new ArgumentNullException(nameof(repository));
+            _Mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            _PropertyMappingService = propertyMappingService ?? throw new ArgumentNullException(nameof(propertyMappingService));
         }
 
         /// <summary>
@@ -46,13 +52,40 @@ namespace TodoAPI.Controllers
         /// GET optionally with query filter
         /// </summary>
         /// <returns>200</returns>
-        [HttpGet]
+        [HttpGet(Name = GetTasksRoute)]
         [HttpHead]
         public ActionResult<IEnumerable<Models.TaskDTO>> GetTasks(
             [FromQuery] TaskResourceParameters parameters)
         {
+            //check property mapping DTO to Entity (for sorting)
+            if (!_PropertyMappingService
+                .ValidMappingExistsFor<Models.TaskDTO, Entities.Task>(parameters.orderBy))
+            {
+                return BadRequest();
+            }
+
             //get tasks
             var tasks = _Repo.GetAll(parameters);
+
+            //add paging informations
+            var previousPageLink = tasks.HasPrevious ?
+                CreateTasksResourceUri(parameters,
+                ResourceUriType.PreviousPage) : null;
+            var nextPageLink = tasks.HasNext ?
+                CreateTasksResourceUri(parameters,
+                ResourceUriType.NextPage) : null;
+            var paginationMetaData = new
+            {
+                totalCount = tasks.TotalCount,
+                pageSize = tasks.PageSize,
+                currentPage = tasks.CurrentPage,
+                totalPages = tasks.TotalPages,
+                previousPageLink = previousPageLink,
+                nextPageLink = nextPageLink
+            };
+            //paging metadata add to custom header named "X-Pagination"
+            Response.Headers.Add("X-Pagination",
+                JsonConvert.SerializeObject(paginationMetaData));
 
             //map to DTOs
             var taskDtos = _Mapper.Map<IEnumerable<Models.TaskDTO>>(tasks);
@@ -124,6 +157,13 @@ namespace TodoAPI.Controllers
             if (task == null)
             {
                 return NotFound();
+
+                //here should be UPSERT instead of 404
+
+                //here is UPSERT code if we want to
+                /*
+                UpsertTask(id, updatedDto);
+                */
             }
 
             //map from DTO to ENTITY
@@ -156,6 +196,17 @@ namespace TodoAPI.Controllers
                 return NotFound();
 
                 //here should be UPSERT instead of 404
+
+                //here is UPSERT code if we want to
+                /*
+                var taskDto = new Models.TaskForUpdatingDTO();
+                patch.ApplyTo(taskDto, ModelState);
+                if (!TryValidateModel(taskDto))
+                {
+                    return ValidationProblem(ModelState);
+                }
+                UpsertTask(id, taskDto);
+                */
             }
 
             //map ENTITY to DTO (model for updating)
@@ -204,6 +255,24 @@ namespace TodoAPI.Controllers
             return NoContent();
         }
 
+        /// <summary>
+        /// UPSERT code for creating task by PUT or PATCH
+        /// </summary>
+        /// <returns>201 created at route</returns>
+        private ActionResult UpsertTask(Guid taskId, Models.TaskForUpdatingDTO taskDto)
+        {
+            var taskToAdd = _Mapper.Map<Entities.Task>(taskDto);
+            taskToAdd.Id = taskId;
+
+            Entities.Task addedTask = _Repo.CreateTaskWithSpecifiedId(taskId, taskToAdd);
+
+            var taskToReturn = _Mapper.Map<Models.TaskDTO>(addedTask);
+            return CreatedAtRoute(
+                GetTaskRoute,
+                new { taskId = taskToReturn.Id },
+                taskToReturn
+                );
+        }
 
         /// <summary>
         /// override validation in order to return 422 on validation problem instead of 400
@@ -216,6 +285,41 @@ namespace TodoAPI.Controllers
 
             //return our implementation of InvalidModelStateResponseFactory (returns 422...)
             return (ActionResult)options.Value.InvalidModelStateResponseFactory(ControllerContext);
+        }
+
+        /// <summary>
+        /// creates link to next or previous page
+        /// </summary>
+        private string CreateTasksResourceUri(
+            TaskResourceParameters parameters,
+            ResourceUriType type)
+        {
+            var newParameters = new Dictionary<string, object>();
+            newParameters.Add("orderBy", parameters.orderBy);
+            newParameters.Add("pageSize", parameters.PageSize);
+            newParameters.Add("name", parameters.NameExact);
+            newParameters.Add("search", parameters.Search);
+            newParameters.Add("priority", parameters.Priority);
+            newParameters.Add("priority.gt", parameters.PriorityGT);
+            newParameters.Add("priority.lt", parameters.PriorityLT);
+            switch (type)
+            {
+                case ResourceUriType.PreviousPage:
+                    newParameters.Add("pageNumber", parameters.PageNumber - 1);
+                    return Url.Link(
+                        GetTasksRoute,
+                        newParameters);
+                case ResourceUriType.NextPage:
+                    newParameters.Add("pageNumber", parameters.PageNumber + 1);
+                    return Url.Link(
+                        GetTasksRoute,
+                        newParameters);
+                default:
+                    newParameters.Add("pageNumber", parameters.PageNumber);
+                    return Url.Link(
+                        GetTasksRoute,
+                        newParameters);
+            }
         }
     }
 }

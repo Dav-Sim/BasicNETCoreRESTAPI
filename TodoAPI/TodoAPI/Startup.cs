@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Serialization;
+using TodoAPI.Services.SortingServices;
 
 namespace TodoAPI
 {
@@ -52,11 +53,14 @@ namespace TodoAPI
                 };
             });
 
+            //register PropertyMappingService for sorting (map between DTO and ENTITY props)
+            services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+
             //add automapper for mapping between entities and DTO objects
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
             //add repository
-            services.AddSingleton<Services.TasksRepository>();
+            services.AddSingleton<Services.ITasksRepository, Services.TasksRepository>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

@@ -1,7 +1,13 @@
 # Basic .NET Core REST API
 **Basic example of API in NET Core 3.1**   
    
-This API is not fully "RESTful" - it lacks lot of "advanced" things, like HATEOAS, Caching, Concurrency, data-shaping etc. but anyway it is a good starting point...
+This API is not fully "RESTful" - it lacks some of "advanced" things, like HATEOAS, Caching, Concurrency, data-shaping etc. but anyway it is a good starting point...
+
+## Recently added
+- Added support for UPSERT (create resource using PUT or PATCH)
+- Added Pagination
+- Added Sorting
+- Added collection controller, for GET collection of tasks by ids, or POST collection of tasks - create multiple task at one request.
 
 ## What is inside
 
@@ -58,11 +64,24 @@ AutoMapper.Extensions.Microsoft.DependencyInjection
 For validation is mainly used System.ComponentModel.DataAnnotations attributes, and for class validation there is one custom attribute (which validates whole class).  
 Other option could be implementing IvalidatableObject, but in this demo attributes seemd more versatile to me.
 
-### Filtering GET result
+### Filtering, Sorting, Pagination
 ---
+These components must work together. 
+#### Filtering
 Filtering, sorting etc. in query string can be long and messy if we add all possible parameters to method arguments. In example is used Custom object to do this. 
 instead of many [FromQuery] arguments we use  
 `([FromQuery] TaskResourceParameters parameters)`
+
+#### Sorting
+Sorting can be a little more complicated if the client receives a DTO and not directly ENTITY. In this example is created a mapping between ENTITY properties and DTO properties. 
+
+#### Pagination
+Pagination is necessary for larger data collections. You also need to have some default values if the client does not specify pagination.
+Correctly, the GET request should also return a link to the previous and next page in HTTP Headers (this link contains also data about other filters, sorting etc.) This is applied in this example. 
+
+### Upserting
+---
+Upserting can be a useful ability in some cases. This means that you can use PATCH or PUT to create a resource. It is especially suitable for child elements.
 
 ### Postman test
 In repo you can find postman collection file, in this collection are few tests of basic API functionality.

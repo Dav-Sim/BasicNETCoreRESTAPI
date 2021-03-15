@@ -2,51 +2,80 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using TodoAPI.Helpers;
+using TodoAPI.Services.SortingServices;
 
 namespace TodoAPI.Services
 {
     //Fake repo
-    public class TasksRepository
+    public class TasksRepository : ITasksRepository
     {
-        private List<Entities.Task> _List = new List<Entities.Task>()
+        private List<Entities.Task> _List = new List<Entities.Task>();
+        private readonly IPropertyMappingService _PropertyMapping;
+
+        public TasksRepository(IPropertyMappingService propertyMapping)
         {
-            new Entities.Task()
+            this._PropertyMapping = propertyMapping ?? 
+                throw new ArgumentNullException(nameof(propertyMapping));
+
+            _List = new List<Entities.Task>()
             {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
-                Name = "Task1",
-                Description = "Desc for Task1",
-                Priority = 1,
-                Status = Entities.Status.NotStarted,
-                Updated = DateTime.Now
-            },
-            new Entities.Task()
-            {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
-                Name = "Task2",
-                Description = "Desc for Task2",
-                Priority = 100,
-                Status = Entities.Status.NotStarted,
-                Updated = DateTime.Now
-            },
-            new Entities.Task()
-            {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000003"),
-                Name = "Task3",
-                Description = "Desc for Task3",
-                Priority = 3,
-                Status = Entities.Status.NotStarted,
-                Updated = DateTime.Now
-            },
-            new Entities.Task()
-            {
-                Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
-                Name = "Task4",
-                Description = "Desc for Task4",
-                Priority = 0,
-                Status = Entities.Status.NotStarted,
-                Updated = DateTime.Now
-            }
-        };
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000001"),
+                    Name = "Task1",
+                    Description = "Desc for Task1",
+                    Priority = 1,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                },
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+                    Name = "Task2",
+                    Description = "Desc for Task2",
+                    Priority = 100,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                },
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000003"),
+                    Name = "Task3",
+                    Description = "Desc for Task3",
+                    Priority = 3,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                },
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000004"),
+                    Name = "Task4",
+                    Description = "Desc for Task4",
+                    Priority = 1,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                },
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000005"),
+                    Name = "Task5",
+                    Description = "Desc for Task5",
+                    Priority = 3,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                },
+                new Entities.Task()
+                {
+                    Id = Guid.Parse("00000000-0000-0000-0000-000000000006"),
+                    Name = "Task6",
+                    Description = "Desc for Task6",
+                    Priority = 2,
+                    Status = Entities.Status.NotStarted,
+                    Updated = DateTime.Now
+                }
+            };       
+        }
 
         public void Delete(Entities.Task task)
         {
@@ -65,21 +94,15 @@ namespace TodoAPI.Services
             _List.Add(task);
             return task;
         }
-        public IEnumerable<Entities.Task> GetAll(ResourceParameters.TaskResourceParameters query)
+        public PagedList<Entities.Task> GetAll(ResourceParameters.TaskResourceParameters query)
         {
             if (query == null)
             {
                 throw new ArgumentNullException(nameof(query));
             }
 
-            //if no query return all
-            if (query.IsEmpty)
-            {
-                return GetAll();
-            }
-
             //evaluate query and return
-            IEnumerable<Entities.Task> collection = _List;
+            IQueryable<Entities.Task> collection = _List.AsQueryable();
             if (!string.IsNullOrWhiteSpace(query.Search))
             {
                 var search = query.Search.ToLower().Trim();
@@ -103,16 +126,45 @@ namespace TodoAPI.Services
                 collection = collection.Where(a => a.Priority < query.PriorityLT.Value);
             }
 
-            return collection;
-        }
-        public IEnumerable<Entities.Task> GetAll()
-        {
-            return _List;
+            //order by
+            if (!string.IsNullOrWhiteSpace(query.orderBy))
+            {
+                //get prop mapping dictionary
+                var taskPropertyMappingDictionary =
+                    _PropertyMapping.GetPropertyMapping<Models.TaskDTO, Entities.Task>();
+
+                //apply sort
+                collection = collection.ApplySort(
+                    query.orderBy,
+                    taskPropertyMappingDictionary);
+            }
+
+            return PagedList<Entities.Task>.Create(
+                collection.AsQueryable(),
+                query.PageNumber,
+                query.PageSize);
+
+            //return collection
+            //    .Skip((query.PageNumber - 1) * query.PageSize)
+            //    .Take(query.PageSize);
         }
         public Entities.Task GetOne(Guid id)
         {
             return _List.FirstOrDefault(a => a.Id == id);
         }
-
+        public IEnumerable<Entities.Task> GetAll(IEnumerable<Guid> ids)
+        {
+            return _List.Where(t => ids.Any(id => t.Id == id));
+        }
+        public bool TaskExists(Guid id)
+        {
+            return GetOne(id) != null;
+        }
+        public Entities.Task CreateTaskWithSpecifiedId(Guid taskId, Entities.Task task)
+        {
+            task.Id = taskId;
+            _List.Add(task);
+            return task;
+        }
     }
 }

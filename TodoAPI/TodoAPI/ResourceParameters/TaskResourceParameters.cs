@@ -8,6 +8,9 @@ namespace TodoAPI.ResourceParameters
 {
     public class TaskResourceParameters
     {
+        private const int maxPageSize = 20;
+        private int pageSize = 5;
+
         [FromQuery(Name = "name")]
         public string NameExact { get; set; }
         [FromQuery(Name = "search")]
@@ -19,17 +22,12 @@ namespace TodoAPI.ResourceParameters
         [FromQuery(Name = "priority.lt")]
         public int? PriorityLT { get; set; }
 
-        public bool IsEmpty
-        {
-            get
-            {
-                return
-                    string.IsNullOrWhiteSpace(NameExact) &&
-                    string.IsNullOrWhiteSpace(Search) &&
-                    (Priority == null) &&
-                    (PriorityGT == null) &&
-                    (PriorityLT == null);
-            }
+        public int PageNumber { get; set; } = 1;
+        public int PageSize { 
+            get => pageSize; 
+            set => pageSize = value > maxPageSize ? maxPageSize : value; 
         }
+
+        public string orderBy { get; set; } = "Name";
     }
 }
