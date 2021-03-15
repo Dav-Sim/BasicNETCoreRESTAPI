@@ -167,5 +167,4 @@ namespace TodoAPI.Services
             return task;
         }
     }
-    }
 }
