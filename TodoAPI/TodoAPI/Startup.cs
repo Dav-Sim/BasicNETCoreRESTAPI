@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using HttpCacheHeaders.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -19,6 +20,16 @@ namespace TodoAPI
         public const string CacheFor120seconds = "CacheFor120seconds";
         public void ConfigureServices(IServiceCollection services)
         {
+            //global cache headers, specific can be set by [HttpCacheExpiration]
+            services.AddHttpCacheHeaders((expiratonOpts) =>
+            {
+                expiratonOpts.MaxAge = 60;
+                expiratonOpts.CacheLocation = HttpCacheHeaders.Domain.CacheLocation.Public;
+            }, (validateOpts) =>
+            {
+                validateOpts.MustRevalidate = true;
+            });
+
             //add caching middleware
             services.AddResponseCaching();
 
@@ -88,6 +99,8 @@ namespace TodoAPI
 
             //use caching - must be before userouting
             app.UseResponseCaching();
+
+            app.UseHttpCacheHeaders();
 
             app.UseRouting();
 
