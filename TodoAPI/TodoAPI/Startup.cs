@@ -16,12 +16,23 @@ namespace TodoAPI
 {
     public class Startup
     {
+        public const string CacheFor120seconds = "CacheFor120seconds";
         public void ConfigureServices(IServiceCollection services)
         {
+            //add caching middleware
+            services.AddResponseCaching();
+
             services.AddControllers(opts =>
             {
                 //return 406 when content type not match
                 opts.ReturnHttpNotAcceptable = true;
+
+                //setup cache profiles
+                opts.CacheProfiles.Add(CacheFor120seconds,
+                    new CacheProfile()
+                    {
+                        Duration = 120
+                    });
             })
             //use newtonsoft json serializer as default
             .AddNewtonsoftJson(setup =>
@@ -74,6 +85,9 @@ namespace TodoAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            //use caching - must be before userouting
+            app.UseResponseCaching();
 
             app.UseRouting();
 
