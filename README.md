@@ -1,9 +1,23 @@
 # Basic .NET Core REST API
 **Basic example of API in NET Core 3.1**   
    
-This API is not fully "RESTful" - it lacks some of "advanced" things, like HATEOAS, Caching, Concurrency, data-shaping etc. but anyway it is a good starting point...
+Strictly speaking, this API is not fully RESTful, but it's a good starting point for that. Everything is written very simply so that it can be understood, as I hope.  
+
+### REST constraints
+First little theory, and what we have in our example:
+1) Client–server architecture - YES
+2) Statelessness - YES
+3) Cacheability - **Not yet**
+4) Layered system - YES
+5) Code on demand (optional) - Not planned in our case
+6) The uniform interface constraint
+    - Resource identification in requests - YES
+    - Resource manipulation through representations - YES (in case of datashaping helps us HATEOAS to adhere this constraint)
+    - Self-descriptive messages - YES
+    - Hypermedia as the engine of application state (HATEOAS) - YES (**partially**)
 
 ## Recently added
+- Added vendor specific media type which contains HATEOAS links
 - Added support for UPSERT (create resource using PUT or PATCH)
 - Added Pagination
 - Added Sorting
@@ -82,6 +96,36 @@ Correctly, the GET request should also return a link to the previous and next pa
 ### Upserting
 ---
 Upserting can be a useful ability in some cases. This means that you can use PATCH or PUT to create a resource. It is especially suitable for child elements.
+
+### HATEOAS Links
+---
+if request accepts media type "application/json" (or not contains Accept at all) API returns representation of object/s as json. Nothing more is added to response body.
+But if request accepts 
+- "application/vnd.todoapi.task.hateoas+json" (for get one task)
+- "application/vnd.todoapi.tasks.hateoas+json" (for collection)
+than response contains "value" and "links" properties.
+Single task request ('/api/tasks/{id}')  
+
+        {
+            "id": "01",
+            "name": "Task1",
+            "description": "Desc for Task1",
+            "priority": 1,
+            "status": "NotStarted",
+            "links": [
+                {
+                    "href": "http://localhost:59786/api/tasks/01",
+                    "rel": "self",
+                    "method": "GET"
+                },
+                {
+                    "href": "http://localhost:59786/api/tasks/01",
+                    "rel": "delete",
+                    "method": "DELETE"
+                }
+            ]
+        }
+in case of collection ('/api/tasks') it contains also links for next page and previous page.
 
 ### Postman test
 In repo you can find postman collection file, in this collection are few tests of basic API functionality.
