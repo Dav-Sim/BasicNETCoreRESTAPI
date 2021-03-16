@@ -14,7 +14,7 @@ namespace TodoAPI.Controllers
     [Route("api/taskscollection")]
     public class TasksCollectionController : ControllerBase
     {
-        private const string GetCollectionRoute = "GetCollection";
+        public const string GetCollectionRoute = "GetCollection";
         private ITasksRepository _Repo;
         private IMapper _Mapper;
         public TasksCollectionController(ITasksRepository repo, IMapper mapper)
