@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -49,7 +50,7 @@ namespace TodoAPI.Controllers
         {
             //add Allowed method to headers
             Response.Headers.Add("Allow", "GET,HEAD,OPTIONS,POST");
-            
+
             //return 200
             return Ok();
         }
@@ -96,7 +97,8 @@ namespace TodoAPI.Controllers
                 .ShapeData(parameters.Fields);
 
             //create and add links to each task
-            var tasksWithLinks = taskDtos.Select(t => {
+            var tasksWithLinks = taskDtos.Select(t =>
+            {
                 var taskAsDict = t as IDictionary<string, object>;
                 var taskLinks = CreateLinksForTask((Guid)taskAsDict["Id"]);
                 taskAsDict.Add("links", taskLinks);
@@ -104,7 +106,7 @@ namespace TodoAPI.Controllers
             });
             //create links for collection
             var links = CreateLinksForTasks(parameters,
-                tasks.HasNext, 
+                tasks.HasNext,
                 tasks.HasPrevious);
             //create object with links and collection and return it
             var linkedCollection = new
@@ -112,7 +114,7 @@ namespace TodoAPI.Controllers
                 value = tasksWithLinks,
                 links = links
             };
-            
+
             //return 200 with object in body
             return Ok(linkedCollection);
         }
@@ -123,10 +125,19 @@ namespace TodoAPI.Controllers
         /// <returns>200/404</returns>
         [HttpGet("{id}", Name = GetTaskRoute)]
         [HttpHead("{id}")]
-        public IActionResult GetTask(Guid id, string fields)
+        [Produces(contentType: "application/json",
+            "application/xml",
+            "application/vnd.david.task+json",
+            "application/vnd.david.task.hateoas+json",
+            "application/vnd.david.task.simple+json",
+            "application/vnd.david.task.simple.hateoas+json")]
+        public ActionResult<Models.TaskDTO> GetTask(
+            Guid id, string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
-            //check data shaping fields request
-            if (!_PropertyChecker.TypeHasProperties<Models.TaskDTO>(fields))
+            //check media type (if media type is composed of more types, than use TryParseList)
+            if (!MediaTypeHeaderValue.TryParse(mediaType,
+                out MediaTypeHeaderValue parsedMediaType))
             {
                 return BadRequest();
             }
@@ -140,18 +151,55 @@ namespace TodoAPI.Controllers
                 return NotFound();
             }
 
-            //map to DTO
-            var taskDto = _Mapper.Map<Models.TaskDTO>(task);
 
-            //shape data
-            var shapedDto = taskDto.ShapeData(fields) as IDictionary<string, object>;
+            //check media type
+            bool includeLinks = parsedMediaType.SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+            var primaryMediaType = includeLinks ?
+                parsedMediaType.SubTypeWithoutSuffix.Substring(0, parsedMediaType.SubTypeWithoutSuffix.Length - 8) :
+                parsedMediaType.SubTypeWithoutSuffix;
+
+            IDictionary<string, object> shapedData;
+
+            if (primaryMediaType == "vnd.david.task.simple")
+            {
+                //check data shaping fields request
+                if (!_PropertyChecker.TypeHasProperties<Models.TaskDTO>(fields))
+                {
+                    return BadRequest();
+                }
+
+                //map to DTO
+                var simpleDto = _Mapper.Map<Models.TaskSimpleDto>(task);
+
+                //shape data
+                shapedData = simpleDto.ShapeData(fields) as IDictionary<string, object>;
+
+            }
+            else
+            {
+                //map to DTO
+                var fullDto = _Mapper.Map<Models.TaskDTO>(task);
+
+                //check data shaping fields request
+                if (!_PropertyChecker.TypeHasProperties<Models.TaskDTO>(fields))
+                {
+                    return BadRequest();
+                }
+
+                //shape data
+                shapedData = fullDto.ShapeData(fields) as IDictionary<string, object>;
+            }
 
             //create hateoas links
-            var links = CreateLinksForTask(id, fields);
-            shapedDto.Add("links", links);
+            if (includeLinks)
+            {
+                IEnumerable<Models.LinkDto> links = CreateLinksForTask(id, fields);
+                shapedData.Add("links", links);
+            }
 
             //return 200 with DTO in body
-            return Ok(shapedDto);
+            return Ok(shapedData);
         }
 
         /// <summary>

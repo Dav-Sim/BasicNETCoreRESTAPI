@@ -19,6 +19,9 @@ namespace TodoAPI.Profiles
                 .ForMember(
                     dest => dest.Status,
                     opts => opts.MapFrom(src => src.Status.ToString()));
+            CreateMap<Entities.Task, Models.TaskSimpleDto>()
+                .ForMember(dest => dest.Text,
+                opts => opts.MapFrom(src => $"{src.Name}-{src.Description}-{src.Priority}-{src.Status}"));
 
 
             //create map from DTO to ENTITY

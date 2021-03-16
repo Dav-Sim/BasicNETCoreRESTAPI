@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Serialization;
@@ -52,6 +53,17 @@ namespace TodoAPI
                         ContentTypes = new Microsoft.AspNetCore.Mvc.Formatters.MediaTypeCollection() { "application/problem+json" }
                     };
                 };
+            });
+
+            //added support for vendor specific media type, this must be done after adding output formatter
+            services.Configure<MvcOptions>(config =>
+            {
+                var newtonsofJsonOutputFormatter = config.OutputFormatters
+                    .OfType<NewtonsoftJsonOutputFormatter>()?.FirstOrDefault();
+                if (newtonsofJsonOutputFormatter != null)
+                {
+                    newtonsofJsonOutputFormatter.SupportedMediaTypes.Add("application/vnd.david.hateoas+json");
+                }
             });
 
             //register PropertyMappingService for sorting (map between DTO and ENTITY props)
