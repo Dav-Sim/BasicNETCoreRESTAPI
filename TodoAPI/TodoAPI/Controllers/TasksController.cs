@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.Net.Http.Headers;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -21,8 +22,12 @@ namespace TodoAPI.Controllers
     [Route("api/tasks")]
     public class TasksController : ControllerBase
     {
-        private const string GetTaskRoute = "GetTask";
-        private const string GetTasksRoute = "GetTasks";
+        public const string GetTaskRoute = "GetTask";
+        public const string DeleteTaskRoute = "DeleteTask";
+        public const string PostTaskRoute = "PostTask";
+        public const string PutTaskRoute = "PutTask";
+        public const string PatchTaskRoute = "PatchTask";
+        public const string GetTasksRoute = "GetTasks";
         private readonly ITasksRepository _Repo;
         private readonly IMapper _Mapper;
         private readonly IPropertyMappingService _PropertyMappingService;
@@ -56,9 +61,28 @@ namespace TodoAPI.Controllers
         /// <returns>200</returns>
         [HttpGet(Name = GetTasksRoute)]
         [HttpHead]
-        public ActionResult<IEnumerable<object>> GetTasks(
-            [FromQuery] TaskResourceParameters parameters)
+        [Produces(contentType: "application/json", //default (json withou links)
+            "application/vnd.todoapi.tasks+json", //json without links
+            "application/vnd.todoapi.tasks.hateoas+json", //json with links
+            "application/xml", //xml without links
+            "application/vnd.todoapi.tasks+xml", //xml without links
+            "application/vnd.todoapi.tasks.hateoas+xml" //xml with links
+            )]
+        public IActionResult GetTasks(
+            [FromQuery] TaskResourceParameters parameters,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
+            //check media type (if media type is composed of more types, than use TryParseList)
+            if (!MediaTypeHeaderValue.TryParse(mediaType,
+                out MediaTypeHeaderValue parsedMediaType))
+            {
+                return BadRequest();
+            }
+
+            //check parsed media type if we should include hateoas links
+            bool includeLinks = parsedMediaType.SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+
             //check property mapping DTO to Entity (for sorting)
             if (!_PropertyMappingService
                 .ValidMappingExistsFor<Models.TaskDTO, Entities.Task>(parameters.orderBy))
@@ -76,20 +100,12 @@ namespace TodoAPI.Controllers
             var tasks = _Repo.GetAll(parameters);
 
             //add paging informations
-            var previousPageLink = tasks.HasPrevious ?
-                CreateTasksResourceUri(parameters,
-                ResourceUriType.PreviousPage) : null;
-            var nextPageLink = tasks.HasNext ?
-                CreateTasksResourceUri(parameters,
-                ResourceUriType.NextPage) : null;
             var paginationMetaData = new
             {
                 totalCount = tasks.TotalCount,
                 pageSize = tasks.PageSize,
                 currentPage = tasks.CurrentPage,
-                totalPages = tasks.TotalPages,
-                previousPageLink = previousPageLink,
-                nextPageLink = nextPageLink
+                totalPages = tasks.TotalPages
             };
             //paging metadata add to custom header named "X-Pagination"
             Response.Headers.Add("X-Pagination",
@@ -98,9 +114,35 @@ namespace TodoAPI.Controllers
             //map to DTOs
             var taskDtos = _Mapper.Map<IEnumerable<Models.TaskDTO>>(tasks)
                 .ShapeData(parameters.Fields);
-            
-            //return 200 with DTO in body
-            return Ok(taskDtos);
+
+            if (includeLinks)
+            {
+                //create and add links to each task
+                var tasksWithLinks = taskDtos.Select(t =>
+                {
+                    var taskAsDict = t as IDictionary<string, object>;
+                    var taskLinks = CreateLinksForTask((Guid)taskAsDict["Id"]);
+                    taskAsDict.Add("links", taskLinks);
+                    return taskAsDict;
+                });
+                //create links for collection
+                var links = CreateLinksForTasks(parameters,
+                    tasks.HasNext,
+                    tasks.HasPrevious);
+                //create object with links and collection and return it
+                var linkedCollection = new
+                {
+                    value = tasksWithLinks,
+                    links = links
+                };
+
+                //return 200 with object in body
+                return Ok(linkedCollection); 
+            }
+            else
+            {
+                return Ok(taskDtos);
+            }
         }
 
         /// <summary>
@@ -109,8 +151,27 @@ namespace TodoAPI.Controllers
         /// <returns>200/404</returns>
         [HttpGet("{id}", Name = GetTaskRoute)]
         [HttpHead("{id}")]
-        public ActionResult<Models.TaskDTO> GetTask(Guid id, string fields)
+        [Produces(contentType: "application/json", //default (json withou links)
+            "application/vnd.todoapi.task+json", //json without links
+            "application/vnd.todoapi.task.hateoas+json", //json with links
+            "application/xml", //xml without links
+            "application/vnd.todoapi.task+xml", //xml without links
+            "application/vnd.todoapi.task.hateoas+xml" //xml with links
+            )]
+        public IActionResult GetTask(Guid id, string fields,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
+            //check media type (if media type is composed of more types, than use TryParseList)
+            if (!MediaTypeHeaderValue.TryParse(mediaType,
+                out MediaTypeHeaderValue parsedMediaType))
+            {
+                return BadRequest();
+            }
+
+            //check parsed media type if we should include hateoas links
+            bool includeLinks = parsedMediaType.SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
+
             //check data shaping fields request
             if (!_PropertyChecker.TypeHasProperties<Models.TaskDTO>(fields))
             {
@@ -130,7 +191,14 @@ namespace TodoAPI.Controllers
             var taskDto = _Mapper.Map<Models.TaskDTO>(task);
 
             //shape data
-            var shapedDto = taskDto.ShapeData(fields);
+            var shapedDto = taskDto.ShapeData(fields) as IDictionary<string, object>;
+
+            //create hateoas links
+            if (includeLinks)
+            {
+                var links = CreateLinksForTask(id, fields);
+                shapedDto.Add("links", links);
+            }
 
             //return 200 with DTO in body
             return Ok(shapedDto);
@@ -140,10 +208,29 @@ namespace TodoAPI.Controllers
         /// POST create task
         /// </summary>
         /// <returns>201 with Link in header</returns>
-        [HttpPost]
-        public ActionResult<Models.TaskDTO> CreateTask(Models.TaskForCreatingDTO task)
+        [HttpPost(Name = PostTaskRoute)]
+        [Produces(contentType: "application/json", //default (json withou links)
+            "application/vnd.todoapi.task+json", //json without links
+            "application/vnd.todoapi.task.hateoas+json", //json with links
+            "application/xml", //xml without links
+            "application/vnd.todoapi.task+xml", //xml without links
+            "application/vnd.todoapi.task.hateoas+xml" //xml with links
+            )]
+        public ActionResult<Models.TaskDTO> CreateTask(Models.TaskForCreatingDTO task,
+            [FromHeader(Name = "Accept")] string mediaType)
         {
             //if task is null or validation failed unprocessable entity 422 is returned
+
+            //check media type (if media type is composed of more types, than use TryParseList)
+            if (!MediaTypeHeaderValue.TryParse(mediaType,
+                out MediaTypeHeaderValue parsedMediaType))
+            {
+                return BadRequest();
+            }
+
+            //check parsed media type if we should include hateoas links
+            bool includeLinks = parsedMediaType.SubTypeWithoutSuffix
+                .EndsWith("hateoas", StringComparison.InvariantCultureIgnoreCase);
 
             //map from DTO to ENTITY
             var taskEntity = _Mapper.Map<Entities.Task>(task);
@@ -152,12 +239,26 @@ namespace TodoAPI.Controllers
             var createdTask = _Repo.Create(taskEntity);
 
             //map created ENTITY to DTO
-            var result = _Mapper.Map<Models.TaskDTO>(createdTask);
+            var createdTaskDto = _Mapper.Map<Models.TaskDTO>(createdTask);
+
+            //result object
+            object result = createdTaskDto;
+
+            if (includeLinks)
+            {
+                //hateoas links
+                var links = CreateLinksForTask(createdTaskDto.Id);
+                var linkedResourceToReturn = createdTaskDto.ShapeData(null)
+                    as IDictionary<string, object>;
+                linkedResourceToReturn.Add("links", links);
+                //set result to linked object
+                result = linkedResourceToReturn;
+            }
 
             //return 201 with Link to task
             return CreatedAtRoute(
                 GetTaskRoute,
-                new { id = result.Id },
+                new { id = createdTaskDto.Id },
                 result);
         }
 
@@ -165,7 +266,7 @@ namespace TodoAPI.Controllers
         /// PUT upade task
         /// </summary>
         /// <returns>204/404</returns>
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = PutTaskRoute)]
         public IActionResult UpdateTask(Guid id, Models.TaskForUpdatingDTO updatedDto)
         {
             //get task
@@ -201,7 +302,7 @@ namespace TodoAPI.Controllers
         /// PATCH partial update task
         /// </summary>
         /// <returns>204/404</returns>
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = PatchTaskRoute)]
         public IActionResult PatchTask(Guid id,
             JsonPatchDocument<Models.TaskForUpdatingDTO> patch)
         {
@@ -257,7 +358,7 @@ namespace TodoAPI.Controllers
         /// DELETE delete task
         /// </summary>
         /// <returns>204/404</returns>
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = DeleteTaskRoute)]
         public IActionResult DeleteTask(Guid id)
         {
             //get task
@@ -333,12 +434,75 @@ namespace TodoAPI.Controllers
                     return Url.Link(
                         GetTasksRoute,
                         newParameters);
+                case ResourceUriType.Current:
                 default:
                     newParameters.Add("pageNumber", parameters.PageNumber);
                     return Url.Link(
                         GetTasksRoute,
                         newParameters);
             }
+        }
+
+        /// <summary>
+        /// create hateoas links collection for task
+        /// </summary>
+        private IEnumerable<Models.LinkDto> CreateLinksForTask(Guid taskId, string fields = null)
+        {
+            var links = new List<Models.LinkDto>();
+            object getRouteValues;
+            if (string.IsNullOrWhiteSpace(fields))
+            {
+                getRouteValues = new { id = taskId };
+            }
+            else
+            {
+                getRouteValues = new { id = taskId, fields };
+            }
+
+            links.Add(new Models.LinkDto(
+                Url.Link(GetTaskRoute, getRouteValues),
+                "self",
+                "GET"));
+            links.Add(new Models.LinkDto(
+                Url.Link(DeleteTaskRoute, new { id = taskId }),
+                "delete",
+                "DELETE"));
+
+
+            return links;
+        }
+
+        /// <summary>
+        /// create hateoas links collection for task
+        /// </summary>
+        private IEnumerable<Models.LinkDto> CreateLinksForTasks(
+            TaskResourceParameters parameters,
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<Models.LinkDto>();
+
+            //self
+            links.Add(new Models.LinkDto(
+                CreateTasksResourceUri(parameters, ResourceUriType.Current),
+                "self", "GET"));
+
+            //in our implementation collection cannot be deleted nor updated, so self is only one link 
+
+            //next and previous page links
+            if (hasNext)
+            {
+                links.Add(new Models.LinkDto(
+                CreateTasksResourceUri(parameters, ResourceUriType.NextPage),
+                "nextPage", "GET"));
+            }
+            if (hasPrevious)
+            {
+                links.Add(new Models.LinkDto(
+                CreateTasksResourceUri(parameters, ResourceUriType.PreviousPage),
+                "previousPage", "GET"));
+            }
+
+            return links;
         }
     }
 }
