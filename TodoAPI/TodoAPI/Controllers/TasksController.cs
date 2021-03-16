@@ -21,8 +21,12 @@ namespace TodoAPI.Controllers
     [Route("api/tasks")]
     public class TasksController : ControllerBase
     {
-        private const string GetTaskRoute = "GetTask";
-        private const string GetTasksRoute = "GetTasks";
+        public const string GetTaskRoute = "GetTask";
+        public const string DeleteTaskRoute = "DeleteTask";
+        public const string PostTaskRoute = "PostTask";
+        public const string PutTaskRoute = "PutTask";
+        public const string PatchTaskRoute = "PatchTask";
+        public const string GetTasksRoute = "GetTasks";
         private readonly ITasksRepository _Repo;
         private readonly IMapper _Mapper;
         private readonly IPropertyMappingService _PropertyMappingService;
@@ -56,7 +60,7 @@ namespace TodoAPI.Controllers
         /// <returns>200</returns>
         [HttpGet(Name = GetTasksRoute)]
         [HttpHead]
-        public ActionResult<IEnumerable<object>> GetTasks(
+        public IActionResult GetTasks(
             [FromQuery] TaskResourceParameters parameters)
         {
             //check property mapping DTO to Entity (for sorting)
@@ -76,20 +80,12 @@ namespace TodoAPI.Controllers
             var tasks = _Repo.GetAll(parameters);
 
             //add paging informations
-            var previousPageLink = tasks.HasPrevious ?
-                CreateTasksResourceUri(parameters,
-                ResourceUriType.PreviousPage) : null;
-            var nextPageLink = tasks.HasNext ?
-                CreateTasksResourceUri(parameters,
-                ResourceUriType.NextPage) : null;
             var paginationMetaData = new
             {
                 totalCount = tasks.TotalCount,
                 pageSize = tasks.PageSize,
                 currentPage = tasks.CurrentPage,
                 totalPages = tasks.TotalPages,
-                previousPageLink = previousPageLink,
-                nextPageLink = nextPageLink
             };
             //paging metadata add to custom header named "X-Pagination"
             Response.Headers.Add("X-Pagination",
@@ -98,9 +94,27 @@ namespace TodoAPI.Controllers
             //map to DTOs
             var taskDtos = _Mapper.Map<IEnumerable<Models.TaskDTO>>(tasks)
                 .ShapeData(parameters.Fields);
+
+            //create and add links to each task
+            var tasksWithLinks = taskDtos.Select(t => {
+                var taskAsDict = t as IDictionary<string, object>;
+                var taskLinks = CreateLinksForTask((Guid)taskAsDict["Id"]);
+                taskAsDict.Add("links", taskLinks);
+                return taskAsDict;
+            });
+            //create links for collection
+            var links = CreateLinksForTasks(parameters,
+                tasks.HasNext, 
+                tasks.HasPrevious);
+            //create object with links and collection and return it
+            var linkedCollection = new
+            {
+                value = tasksWithLinks,
+                links = links
+            };
             
-            //return 200 with DTO in body
-            return Ok(taskDtos);
+            //return 200 with object in body
+            return Ok(linkedCollection);
         }
 
         /// <summary>
@@ -109,7 +123,7 @@ namespace TodoAPI.Controllers
         /// <returns>200/404</returns>
         [HttpGet("{id}", Name = GetTaskRoute)]
         [HttpHead("{id}")]
-        public ActionResult<Models.TaskDTO> GetTask(Guid id, string fields)
+        public IActionResult GetTask(Guid id, string fields)
         {
             //check data shaping fields request
             if (!_PropertyChecker.TypeHasProperties<Models.TaskDTO>(fields))
@@ -130,7 +144,11 @@ namespace TodoAPI.Controllers
             var taskDto = _Mapper.Map<Models.TaskDTO>(task);
 
             //shape data
-            var shapedDto = taskDto.ShapeData(fields);
+            var shapedDto = taskDto.ShapeData(fields) as IDictionary<string, object>;
+
+            //create hateoas links
+            var links = CreateLinksForTask(id, fields);
+            shapedDto.Add("links", links);
 
             //return 200 with DTO in body
             return Ok(shapedDto);
@@ -140,7 +158,7 @@ namespace TodoAPI.Controllers
         /// POST create task
         /// </summary>
         /// <returns>201 with Link in header</returns>
-        [HttpPost]
+        [HttpPost(Name = PostTaskRoute)]
         public ActionResult<Models.TaskDTO> CreateTask(Models.TaskForCreatingDTO task)
         {
             //if task is null or validation failed unprocessable entity 422 is returned
@@ -154,18 +172,24 @@ namespace TodoAPI.Controllers
             //map created ENTITY to DTO
             var result = _Mapper.Map<Models.TaskDTO>(createdTask);
 
+            //hateoas links
+            var links = CreateLinksForTask(result.Id);
+            var linkedResourceToReturn = result.ShapeData(null)
+                as IDictionary<string, object>;
+            linkedResourceToReturn.Add("links", links);
+
             //return 201 with Link to task
             return CreatedAtRoute(
                 GetTaskRoute,
                 new { id = result.Id },
-                result);
+                linkedResourceToReturn);
         }
 
         /// <summary>
         /// PUT upade task
         /// </summary>
         /// <returns>204/404</returns>
-        [HttpPut("{id}")]
+        [HttpPut("{id}", Name = PutTaskRoute)]
         public IActionResult UpdateTask(Guid id, Models.TaskForUpdatingDTO updatedDto)
         {
             //get task
@@ -201,7 +225,7 @@ namespace TodoAPI.Controllers
         /// PATCH partial update task
         /// </summary>
         /// <returns>204/404</returns>
-        [HttpPatch("{id}")]
+        [HttpPatch("{id}", Name = PatchTaskRoute)]
         public IActionResult PatchTask(Guid id,
             JsonPatchDocument<Models.TaskForUpdatingDTO> patch)
         {
@@ -257,7 +281,7 @@ namespace TodoAPI.Controllers
         /// DELETE delete task
         /// </summary>
         /// <returns>204/404</returns>
-        [HttpDelete("{id}")]
+        [HttpDelete("{id}", Name = DeleteTaskRoute)]
         public IActionResult DeleteTask(Guid id)
         {
             //get task
@@ -333,12 +357,75 @@ namespace TodoAPI.Controllers
                     return Url.Link(
                         GetTasksRoute,
                         newParameters);
+                case ResourceUriType.Current:
                 default:
                     newParameters.Add("pageNumber", parameters.PageNumber);
                     return Url.Link(
                         GetTasksRoute,
                         newParameters);
             }
+        }
+
+        /// <summary>
+        /// create hateoas links collection for task
+        /// </summary>
+        private IEnumerable<Models.LinkDto> CreateLinksForTask(Guid taskId, string fields = null)
+        {
+            var links = new List<Models.LinkDto>();
+            object getRouteValues;
+            if (string.IsNullOrWhiteSpace(fields))
+            {
+                getRouteValues = new { id = taskId };
+            }
+            else
+            {
+                getRouteValues = new { id = taskId, fields };
+            }
+
+            links.Add(new Models.LinkDto(
+                Url.Link(GetTaskRoute, getRouteValues),
+                "self",
+                "GET"));
+            links.Add(new Models.LinkDto(
+                Url.Link(DeleteTaskRoute, new { id = taskId }),
+                "delete",
+                "DELETE"));
+
+
+            return links;
+        }
+
+        /// <summary>
+        /// create hateoas links collection for task
+        /// </summary>
+        private IEnumerable<Models.LinkDto> CreateLinksForTasks(
+            TaskResourceParameters parameters,
+            bool hasNext, bool hasPrevious)
+        {
+            var links = new List<Models.LinkDto>();
+
+            //self
+            links.Add(new Models.LinkDto(
+                CreateTasksResourceUri(parameters, ResourceUriType.Current),
+                "self", "GET"));
+
+            //in our implementation collection cannot be deleted nor updated, so self is only one link 
+
+            //next and previous page links
+            if (hasNext)
+            {
+                links.Add(new Models.LinkDto(
+                CreateTasksResourceUri(parameters, ResourceUriType.NextPage),
+                "nextPage", "GET"));
+            }
+            if (hasPrevious)
+            {
+                links.Add(new Models.LinkDto(
+                CreateTasksResourceUri(parameters, ResourceUriType.PreviousPage),
+                "previousPage", "GET"));
+            }
+
+            return links;
         }
     }
 }
