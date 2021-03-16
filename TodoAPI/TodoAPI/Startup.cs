@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Serialization;
+using TodoAPI.Services;
 using TodoAPI.Services.SortingServices;
 
 namespace TodoAPI
@@ -55,6 +56,9 @@ namespace TodoAPI
 
             //register PropertyMappingService for sorting (map between DTO and ENTITY props)
             services.AddTransient<IPropertyMappingService, PropertyMappingService>();
+
+            //register property checker service (check for property exists on specified type)
+            services.AddTransient<IPropertyCheckerService, PropertyCheckerService>();
 
             //add automapper for mapping between entities and DTO objects
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
