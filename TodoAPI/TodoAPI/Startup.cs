@@ -20,7 +20,8 @@ namespace TodoAPI
         public const string CacheFor120seconds = "CacheFor120seconds";
         public void ConfigureServices(IServiceCollection services)
         {
-            //global cache headers, specific can be set by [HttpCacheExpiration]
+            //add global cache headers service, specific can be set by [HttpCacheExpiration]
+            //this middleware adds ETag etc.
             services.AddHttpCacheHeaders((expiratonOpts) =>
             {
                 expiratonOpts.MaxAge = 60;
@@ -31,7 +32,8 @@ namespace TodoAPI
             });
 
             //add caching middleware
-            services.AddResponseCaching();
+            //this microsoft middleware add Cache-Control public,max-age=120
+            //services.AddResponseCaching();
 
             services.AddControllers(opts =>
             {
@@ -100,6 +102,7 @@ namespace TodoAPI
             //use caching - must be before userouting
             app.UseResponseCaching();
 
+            //add cache headers
             app.UseHttpCacheHeaders();
 
             app.UseRouting();

@@ -20,7 +20,7 @@ namespace TodoAPI.Controllers
 {
     [ApiController]
     [Route("api/tasks")]
-    [ResponseCache(CacheProfileName = Startup.CacheFor120seconds)]
+    //[ResponseCache(CacheProfileName = Startup.CacheFor120seconds)]
     public class TasksController : ControllerBase
     {
         public const string GetTaskRoute = "GetTask";
