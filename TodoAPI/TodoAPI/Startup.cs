@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Serialization;
+using TodoAPI.Middlewares;
 using TodoAPI.Services;
 using TodoAPI.Services.SortingServices;
 
@@ -74,6 +75,8 @@ namespace TodoAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseETagger();
 
             app.UseRouting();
 
