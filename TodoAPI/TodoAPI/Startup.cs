@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CacheHeaders.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -18,6 +19,16 @@ namespace TodoAPI
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            //ETagger options
+            services.AddETagger(expirationOpts =>
+            {
+                expirationOpts.MaxAge = 120;
+            }, validationOpts =>
+            {
+                validationOpts.MustRevalidate = true;
+            }
+            );
+
             services.AddControllers(opts =>
             {
                 //return 406 when content type not match
@@ -74,6 +85,9 @@ namespace TodoAPI
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            //Use ETagger middleware - must be before UseRouting!
+            app.UseETagger();
 
             app.UseRouting();
 

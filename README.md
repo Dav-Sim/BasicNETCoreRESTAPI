@@ -1,22 +1,24 @@
 # Basic .NET Core REST API
 **Basic example of API in NET Core 3.1**   
    
-Strictly speaking, this API is not fully RESTful, but it's a good starting point for that. Everything is written very simply so that it can be understood, as I hope.  
+Strictly speaking, this API is not fully RESTful, but it's relatively close to that. Everything is written very simply so that it can be understood, as I hope.  
 
 ### REST constraints
-First little theory, and what we have in our example:
-1) Client–server architecture - YES
-2) Statelessness - YES
-3) Cacheability - **Not yet**
-4) Layered system - YES
-5) Code on demand (optional) - Not planned in our case
+First little theory, and what we have in our example.  
+
+1) Client–server architecture - **YES**
+2) Statelessness - **YES**
+3) Cacheability - ***partially***
+4) Layered system - **YES**
+5) Code on demand (optional) - ***Not planned*** in our case
 6) The uniform interface constraint
-    - Resource identification in requests - YES
-    - Resource manipulation through representations - YES (in case of datashaping helps us HATEOAS to adhere this constraint)
-    - Self-descriptive messages - YES
-    - Hypermedia as the engine of application state (HATEOAS) - YES (**partially**)
+    - Resource identification in requests - **YES**
+    - Resource manipulation through representations - **YES** (in case of datashaping helps us HATEOAS to adhere this constraint)
+    - Self-descriptive messages - **YES**
+    - Hypermedia as the engine of application state (HATEOAS) - **YES** (***partially***)
 
 ## Recently added
+- Added support for Caching headers (ETag, Cache-Control...) and support for request with headers If-None-Match (GET/HEAD) and If-Match (PUT/PATCH)
 - Added vendor specific media type which contains HATEOAS links
 - Added support for UPSERT (create resource using PUT or PATCH)
 - Added Pagination
@@ -27,12 +29,12 @@ First little theory, and what we have in our example:
 
 ### Content negotiation
 ---
-Works correctly with media types like "application/json" or "application/xml" otherwise it returns 406 (not acceptable)
+Works correctly with media types like "application/json" or "application/xml" otherwise it returns 406 (not acceptable) also supports custom media type.
 
 ### Http Status codes
 ---
 Returns correct status codes
-- 200/201/204 for correct operation
+- 2xx for correct operation
 - 4xx for consumer errors
 - eventually 5xx for server errors
 
@@ -127,7 +129,27 @@ Single task request ('/api/tasks/{id}')
         }
 in case of collection ('/api/tasks') it contains also links for next page and previous page.
 
+### Cache headers
+---
+In example is created simple custom middleware which adds ETag, Cache-Control etc. to response headers. 
+Middleware should be setup globally in startup.cs (ConfigureServices), or partially by class or methods attributes.  
+
+Middleware in case of GET/HEAD request with **If-None-Match** header, will serve 304-NotModified (if not modified).  
+
+In case of PUT/PATCH request with **If-Match** header, will serve 412 Precondition failed (if ETag not match)  
+
+ETag is MD5 hash of response
+
+Example of headers
+
+    Cache-Control=public,max-age=120,must-revalidate
+    Expires=Wed, 17 Mar 2021 20:21:26 GMT
+    Last-Modified=Wed, 17 Mar 2021 20:19:26 GMT
+    ETag="287C17D93C066AE2B4065361415D2EFD"
+
+
 ### Postman test
+---
 In repo you can find postman collection file, in this collection are few tests of basic API functionality.
 ![Postman image][postman]
 

@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CacheHeaders.Attributes;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -158,6 +159,7 @@ namespace TodoAPI.Controllers
             "application/vnd.todoapi.task+xml", //xml without links
             "application/vnd.todoapi.task.hateoas+xml" //xml with links
             )]
+        [ETaggerCacheExpiration(MaxAge = 60)]
         public IActionResult GetTask(Guid id, string fields,
             [FromHeader(Name = "Accept")] string mediaType)
         {

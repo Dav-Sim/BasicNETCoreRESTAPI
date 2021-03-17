@@ -183,6 +183,45 @@
 			]
 		},
 		{
+			"name": "GET root",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}",
+					"host": [
+						"{{URL}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
 			"name": "OPTIONS",
 			"event": [
 				{
@@ -316,6 +355,69 @@
 						{
 							"key": "fields",
 							"value": "id, name"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET tasks dataShaping with links",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"pm.test(\"result object has 2 fields\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(Object.keys(jsonData).length).to.eql(2);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/vnd.todoapi.tasks.hateoas+json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks?fields=id, name",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks"
+					],
+					"query": [
+						{
+							"key": "fields",
+							"value": "id, name"
+						},
+						{
+							"key": "pageSize",
+							"value": "2",
+							"disabled": true
 						}
 					]
 				}
@@ -791,6 +893,134 @@
 						"value": "application/xml",
 						"type": "text",
 						"disabled": true
+					},
+					{
+						"key": "If-None-Match",
+						"value": "\"E3240FC5FB10DF8E79BF6AE89F24AEC9\"",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks",
+						"00000000-0000-0000-0000-000000000001"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET task cache",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200 or 304\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200, 304]);\r",
+							"    tests[\"code is \" + pm.response.code] = true; \r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "If-None-Match",
+						"value": "\"287C17D93C066AE2B4065361415D2EFD\"",
+						"type": "text"
+					},
+					{
+						"key": "If-None-Match",
+						"value": "hovna",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks",
+						"00000000-0000-0000-0000-000000000001"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET task hateoas",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Accept",
+						"value": "application/vnd.todoapi.task+json",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Accept",
+						"value": "application/vnd.todoapi.task.hateoas+json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/vnd.todoapi.task+xml",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Accept",
+						"value": "application/vnd.todoapi.task.hateoas+xml",
+						"type": "text",
+						"disabled": true
 					}
 				],
 				"url": {
@@ -837,7 +1067,7 @@
 					}
 				],
 				"url": {
-					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001?fields=name, priority",
+					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001?fields=name,priority",
 					"host": [
 						"{{URL}}"
 					],
@@ -848,7 +1078,56 @@
 					"query": [
 						{
 							"key": "fields",
-							"value": "name, priority"
+							"value": "name,priority"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET task shaped and hateoas",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/vnd.todoapi.task.hateoas+json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/xml",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"url": {
+					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001?fields=name,priority",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks",
+						"00000000-0000-0000-0000-000000000001"
+					],
+					"query": [
+						{
+							"key": "fields",
+							"value": "name,priority"
 						}
 					]
 				}
@@ -886,7 +1165,7 @@
 					}
 				],
 				"url": {
-					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001?fields=name, nonsens",
+					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001?fields=name,nonsens",
 					"host": [
 						"{{URL}}"
 					],
@@ -897,7 +1176,7 @@
 					"query": [
 						{
 							"key": "fields",
-							"value": "name, nonsens"
+							"value": "name,nonsens"
 						}
 					]
 				}
@@ -1026,6 +1305,66 @@
 						"key": "Content-Type",
 						"value": "application/json",
 						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/vnd.tasks.task.hateoas+json",
+						"type": "text",
+						"disabled": true
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Added Task\",\r\n    \"description\": \"Added Task description\",\r\n    \"status\": \"NotStarted\"\r\n}"
+				},
+				"url": {
+					"raw": "{{URL}}/tasks",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST hateoas links",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"pm.test(\"Location is present\", function () {\r",
+							"    pm.response.to.have.header(\"Location\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept",
+						"value": "application/vnd.todoapi.task.hateoas+json",
+						"type": "text"
 					}
 				],
 				"body": {
@@ -1117,6 +1456,64 @@
 						"key": "Content-Type",
 						"value": "application/json",
 						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"name\": \"Updated Task\",\r\n    \"description\": \"Updated Task description\",\r\n    \"status\": \"InProgress\"\r\n}"
+				},
+				"url": {
+					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks",
+						"00000000-0000-0000-0000-000000000001"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT concurrency",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204 or 412\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([412, 204]);\r",
+							"    tests[\"code is \" + pm.response.code] = true; \r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "If-Match",
+						"value": "\"287C17D93C066AE2B4065361415D2EFD\"",
+						"type": "text"
+					},
+					{
+						"key": "If-Match",
+						"value": "\"OiP3YCEX2iIQVTJk-rbz-5JRvJA\"",
+						"type": "text",
+						"disabled": true
 					}
 				],
 				"body": {
@@ -1255,6 +1652,64 @@
 					{
 						"key": "Content-Type",
 						"value": "application/json-patch+json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "[\r\n    {\r\n        \"op\": \"replace\",\r\n        \"path\": \"/name\",\r\n        \"value\": \"Patched name\"\r\n    },\r\n    {\r\n        \"op\": \"remove\",\r\n        \"path\": \"/status\"\r\n    }\r\n]"
+				},
+				"url": {
+					"raw": "{{URL}}/tasks/00000000-0000-0000-0000-000000000001",
+					"host": [
+						"{{URL}}"
+					],
+					"path": [
+						"tasks",
+						"00000000-0000-0000-0000-000000000001"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PATCH concurrency",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 204 or 412\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([412, 204]);\r",
+							"    tests[\"code is \" + pm.response.code] = true; \r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json-patch+json",
+						"type": "text"
+					},
+					{
+						"key": "If-Match",
+						"value": "\"AAAAAAAAAAAAAAA\"",
+						"type": "text",
+						"disabled": true
+					},
+					{
+						"key": "If-Match",
+						"value": "\"287C17D93C066AE2B4065361415D2EFD\"",
 						"type": "text"
 					}
 				],
