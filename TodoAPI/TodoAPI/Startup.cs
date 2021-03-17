@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CacheHeaders.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json.Serialization;
-using TodoAPI.Middlewares;
 using TodoAPI.Services;
 using TodoAPI.Services.SortingServices;
 
@@ -19,6 +19,16 @@ namespace TodoAPI
     {
         public void ConfigureServices(IServiceCollection services)
         {
+            //ETagger options
+            services.AddETagger(expirationOpts =>
+            {
+                expirationOpts.MaxAge = 120;
+            }, validationOpts =>
+            {
+                validationOpts.MustRevalidate = true;
+            }
+            );
+
             services.AddControllers(opts =>
             {
                 //return 406 when content type not match
@@ -76,6 +86,7 @@ namespace TodoAPI
                 app.UseDeveloperExceptionPage();
             }
 
+            //Use ETagger middleware - must be before UseRouting!
             app.UseETagger();
 
             app.UseRouting();
