@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Marvin.Cache.Headers;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -20,7 +21,6 @@ namespace TodoAPI.Controllers
 {
     [ApiController]
     [Route("api/tasks")]
-    //[ResponseCache(CacheProfileName = Startup.CacheFor120seconds)]
     public class TasksController : ControllerBase
     {
         public const string GetTaskRoute = "GetTask";
@@ -60,6 +60,7 @@ namespace TodoAPI.Controllers
         /// GET optionally with query filter
         /// </summary>
         /// <returns>200</returns>
+        [HttpCacheExpiration(MaxAge = 120)]
         [HttpGet(Name = GetTasksRoute)]
         [HttpHead]
         [Produces(contentType: "application/json", //default (json withou links)

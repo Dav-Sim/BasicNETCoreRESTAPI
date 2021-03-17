@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using HttpCacheHeaders.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -17,19 +16,19 @@ namespace TodoAPI
 {
     public class Startup
     {
-        public const string CacheFor120seconds = "CacheFor120seconds";
         public void ConfigureServices(IServiceCollection services)
         {
-            //add global cache headers service, specific can be set by [HttpCacheExpiration]
+            //add global cache headers service, specific can be set by [CacheExpiration]
             //this middleware adds ETag etc.
-            services.AddHttpCacheHeaders((expiratonOpts) =>
-            {
-                expiratonOpts.MaxAge = 60;
-                expiratonOpts.CacheLocation = HttpCacheHeaders.Domain.CacheLocation.Public;
-            }, (validateOpts) =>
-            {
-                validateOpts.MustRevalidate = true;
-            });
+            services.AddHttpCacheHeaders(
+                (expiratonOpts) =>
+                {
+                    expiratonOpts.MaxAge = 240;
+                    expiratonOpts.CacheLocation = Marvin.Cache.Headers.CacheLocation.Public;
+                }, (validateOpts) =>
+                {
+                    validateOpts.MustRevalidate = true;
+                });
 
             //add caching middleware
             //this microsoft middleware add Cache-Control public,max-age=120
@@ -39,13 +38,6 @@ namespace TodoAPI
             {
                 //return 406 when content type not match
                 opts.ReturnHttpNotAcceptable = true;
-
-                //setup cache profiles
-                opts.CacheProfiles.Add(CacheFor120seconds,
-                    new CacheProfile()
-                    {
-                        Duration = 120
-                    });
             })
             //use newtonsoft json serializer as default
             .AddNewtonsoftJson(setup =>
@@ -100,9 +92,9 @@ namespace TodoAPI
             }
 
             //use caching - must be before userouting
-            app.UseResponseCaching();
+            //app.UseResponseCaching();
 
-            //add cache headers
+            //use cache headers
             app.UseHttpCacheHeaders();
 
             app.UseRouting();
